@@ -14,11 +14,11 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-
 import os
-import sys
+# import sys
 import shutil
 import re
+import logging
 import argparse
 from typing import List, Dict
 from pathlib import Path
@@ -42,7 +42,6 @@ sbycmd = "sby"
 config: Dict = dict()
 mode = "bmc"
 
-import logging
 
 coloredlogs_avail = False
 try:
@@ -107,15 +106,22 @@ def get_args() -> argparse.Namespace:
     parser.add_argument(
         "--basedir",
         action="store",
-        help="riscv-formal top directory",
+        help="riscv-formal top directory - will replace @basedir@ in configuration file",  # noqa: E501
         required=False,
     )
 
     parser.add_argument(
         "--corename",
         action="store",
-        help="Name of the CPU core ckecks are going to be generated for",
+        help="Name of the CPU core ckecks are going to be generated for - will replace @core@ in configuration file",  # noqa: E501
         required=True,
+    )
+
+    parser.add_argument(
+        "--coredir",
+        action="store",
+        help="CPU top directory",
+        required=False,
     )
 
     parser.add_argument(
@@ -135,6 +141,7 @@ setup_logging(args.verbosity)
 
 cfgname = args.config[0]
 corename = args.corename
+coredir = args.coredir
 outdir = args.outdir
 basedir = str(Path(args.basedir).expanduser())
 
@@ -236,6 +243,9 @@ def print_hfmt(f, text, **kwargs):
 hargs: Dict = dict()
 hargs["basedir"] = basedir
 hargs["core"] = corename
+# Make new parameters available in cfg file
+hargs["coredir"] = coredir
+hargs["outdir"] = coredir
 hargs["nret"] = nret
 hargs["xlen"] = xlen
 hargs["ilen"] = ilen
