@@ -141,9 +141,11 @@ setup_logging(args.verbosity)
 
 cfgname = args.config[0]
 corename = args.corename
-coredir = args.coredir
+# we must use absolute pathes as the formal verification process will involved
+# copy of files
+coredir = str(Path(args.coredir).expanduser().resolve(strict=False))
 outdir = args.outdir
-basedir = str(Path(args.basedir).expanduser())
+basedir = str(Path(args.basedir).expanduser().resolve(strict=False))
 
 # if len(sys.argv) > 1:
 #    assert len(sys.argv) == 2
