@@ -414,6 +414,15 @@ def check_insn(insn, chanidx, csr_mode=False):
             """,
                 **hargs,
             )
+        for ef in extra_files:
+            print(ef, file=sby_file)
+        print_hfmt(
+            sby_file,
+            """
+                : [file defines.sv]
+        """,
+            **hargs,
+        )
 
         print_hfmt(
             sby_file,
