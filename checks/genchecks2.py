@@ -125,6 +125,14 @@ def get_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--extrafiles",
+        action="store",
+        help="Comma separated list of files to be added in the file section of the configuration file",  # noqa: E501
+        required=False,
+        default=""
+    )
+
+    parser.add_argument(
         "-v",
         "--verbosity",
         action="count",
@@ -135,6 +143,9 @@ def get_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+def fix_path(p):
+    fp = str(Path(p).expanduser().resolve(strict=False))
+    return  fp
 
 args = get_args()
 setup_logging(args.verbosity)
@@ -143,9 +154,10 @@ cfgname = args.config[0]
 corename = args.corename
 # we must use absolute pathes as the formal verification process will involved
 # copy of files
-coredir = str(Path(args.coredir).expanduser().resolve(strict=False))
+coredir = fix_path(args.coredir)
 outdir = args.outdir
-basedir = str(Path(args.basedir).expanduser().resolve(strict=False))
+basedir = fix_path(args.basedir)
+extra_files = [fix_path(f) for f in args.extrafiles.split(',')]
 
 # if len(sys.argv) > 1:
 #    assert len(sys.argv) == 2
@@ -620,7 +632,15 @@ def check_cons(
                 : @basedir@/checks/rvfi_channel.sv
                 : @basedir@/checks/rvfi_testbench.sv
                 : @basedir@/checks/rvfi_@check@_check.sv
-                :
+        """,
+            **hargs,
+        )
+
+        for ef in extra_files:
+            print(ef, file=sby_file)
+        print_hfmt(
+            sby_file,
+            """
                 : [file defines.sv]
         """,
             **hargs,
